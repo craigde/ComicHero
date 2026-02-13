@@ -1,54 +1,64 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateTable
 CREATE TABLE "WantListItem" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "volumeName" TEXT NOT NULL,
     "issueNumber" TEXT NOT NULL,
     "comicVineIssueId" INTEGER,
-    "targetMaxPrice" REAL NOT NULL,
+    "targetMaxPrice" DOUBLE PRECISION NOT NULL,
     "notes" TEXT,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    "lastCheckedAt" DATETIME
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "lastCheckedAt" TIMESTAMP(3),
+
+    CONSTRAINT "WantListItem_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "WantListMatch" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "wantListItemId" TEXT NOT NULL,
     "ebayItemId" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "price" REAL NOT NULL,
-    "totalPrice" REAL NOT NULL,
+    "price" DOUBLE PRECISION NOT NULL,
+    "totalPrice" DOUBLE PRECISION NOT NULL,
     "imageUrl" TEXT,
     "itemUrl" TEXT NOT NULL,
-    "dealScore" REAL,
-    "percentBelow" REAL,
-    "foundAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "dealScore" DOUBLE PRECISION,
+    "percentBelow" DOUBLE PRECISION,
+    "foundAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "isNew" BOOLEAN NOT NULL DEFAULT true,
-    CONSTRAINT "WantListMatch_wantListItemId_fkey" FOREIGN KEY ("wantListItemId") REFERENCES "WantListItem" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+
+    CONSTRAINT "WantListMatch_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "CachedComicVineData" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "cacheKey" TEXT NOT NULL,
     "dataType" TEXT NOT NULL,
     "jsonData" TEXT NOT NULL,
-    "fetchedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "expiresAt" DATETIME NOT NULL
+    "fetchedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "CachedComicVineData_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "PriceSnapshot" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "volumeName" TEXT NOT NULL,
     "issueNumber" TEXT NOT NULL,
-    "grade" REAL,
-    "averagePrice" REAL NOT NULL,
-    "medianPrice" REAL NOT NULL,
+    "grade" DOUBLE PRECISION,
+    "averagePrice" DOUBLE PRECISION NOT NULL,
+    "medianPrice" DOUBLE PRECISION NOT NULL,
     "dataPoints" INTEGER NOT NULL,
-    "snapshotDate" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "snapshotDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PriceSnapshot_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -74,3 +84,6 @@ CREATE INDEX "PriceSnapshot_volumeName_issueNumber_grade_idx" ON "PriceSnapshot"
 
 -- CreateIndex
 CREATE INDEX "PriceSnapshot_snapshotDate_idx" ON "PriceSnapshot"("snapshotDate");
+
+-- AddForeignKey
+ALTER TABLE "WantListMatch" ADD CONSTRAINT "WantListMatch_wantListItemId_fkey" FOREIGN KEY ("wantListItemId") REFERENCES "WantListItem"("id") ON DELETE CASCADE ON UPDATE CASCADE;
