@@ -7,8 +7,9 @@ export default function Dashboard() {
       <div className="rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 p-8 text-white">
         <h1 className="text-3xl font-bold">Welcome to ComicHero</h1>
         <p className="mt-2 max-w-2xl text-lg text-indigo-100">
-          Source vintage collector comic books from eBay. Search by issue,
-          character, or browse key issues with intelligent deal detection.
+          Your comic book research hub. Browse the Comic Vine database for series,
+          characters, and key issues. When eBay API is connected, search live
+          listings with deal detection.
         </p>
       </div>
 
@@ -25,7 +26,7 @@ export default function Dashboard() {
           </div>
           <h2 className="text-lg font-semibold text-gray-900">Search by Issue</h2>
           <p className="mt-1 text-sm text-gray-600">
-            Find a specific comic. Enter the title and issue number to search eBay listings.
+            Look up a comic series in the Comic Vine database. See cover art, publisher info, and issue counts.
           </p>
           <p className="mt-3 text-sm font-medium text-indigo-600">
             e.g., Amazing Spider-Man #129
@@ -43,7 +44,7 @@ export default function Dashboard() {
           </div>
           <h2 className="text-lg font-semibold text-gray-900">Search by Character</h2>
           <p className="mt-1 text-sm text-gray-600">
-            Find comics featuring your favorite character across all series and eras.
+            Find characters in Comic Vine. See their publisher, appearance count, and first appearance info.
           </p>
           <p className="mt-3 text-sm font-medium text-purple-600">
             e.g., Captain America, Wolverine
@@ -89,12 +90,13 @@ export default function Dashboard() {
 
       {/* API Setup Info */}
       <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-        <h3 className="text-sm font-medium text-amber-800">Setup Required</h3>
+        <h3 className="text-sm font-medium text-amber-800">API Setup</h3>
         <p className="mt-1 text-sm text-amber-700">
-          To search eBay, configure your API keys in the{" "}
+          A <strong>Comic Vine API key</strong> powers series, character, and key issue lookups.
+          Add an <strong>eBay Developer account</strong> when ready to search live marketplace listings and detect deals.
+          Configure both in the{" "}
           <code className="rounded bg-amber-100 px-1 py-0.5 text-xs">.env</code>{" "}
-          file. You need an <strong>eBay Developer account</strong> (for listing search) and
-          optionally a <strong>Comic Vine API key</strong> (for character and key issue data).
+          file.
         </p>
       </div>
     </div>

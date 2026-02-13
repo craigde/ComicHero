@@ -89,7 +89,7 @@ export function KeyIssueCard({ keyIssue }: KeyIssueCardProps) {
           href={searchUrl}
           className="mt-auto rounded-md bg-indigo-600 px-3 py-1.5 text-center text-xs font-medium text-white transition-colors hover:bg-indigo-700"
         >
-          Find on eBay
+          Look Up
         </Link>
       </div>
     </div>
