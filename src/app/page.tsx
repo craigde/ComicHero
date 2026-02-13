@@ -87,18 +87,6 @@ export default function Dashboard() {
           </Link>
         </div>
       </div>
-
-      {/* API Setup Info */}
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-        <h3 className="text-sm font-medium text-amber-800">API Setup</h3>
-        <p className="mt-1 text-sm text-amber-700">
-          A <strong>Comic Vine API key</strong> powers series, character, and key issue lookups.
-          Add an <strong>eBay Developer account</strong> when ready to search live marketplace listings and detect deals.
-          Configure both in the{" "}
-          <code className="rounded bg-amber-100 px-1 py-0.5 text-xs">.env</code>{" "}
-          file.
-        </p>
-      </div>
     </div>
   );
 }
