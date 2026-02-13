@@ -60,7 +60,9 @@ export async function ebayFetch(
 ): Promise<Response> {
   const token = await getAccessToken();
   const { browseUrl } = getBaseUrls();
-  const url = new URL(path, browseUrl);
+  const base = browseUrl.endsWith("/") ? browseUrl : `${browseUrl}/`;
+  const relativePath = path.startsWith("/") ? path.slice(1) : path;
+  const url = new URL(relativePath, base);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
   let lastError: Error | null = null;
