@@ -1,17 +1,24 @@
 import Link from "next/link";
 import type { ComicIssue } from "@/types/comic";
+import type { ReactNode } from "react";
 
 interface IssueCardProps {
   issue: ComicIssue;
+  owned?: boolean;
+  actions?: ReactNode;
 }
 
-export function IssueCard({ issue }: IssueCardProps) {
+export function IssueCard({ issue, owned, actions }: IssueCardProps) {
   return (
-    <Link
-      href={`/issue/${issue.comicVineId}`}
-      className="group flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md"
+    <div
+      className={`group flex flex-col overflow-hidden rounded-lg border bg-white transition-shadow hover:shadow-md ${
+        owned ? "border-green-300 ring-1 ring-green-200" : "border-gray-200"
+      }`}
     >
-      <div className="relative flex aspect-[3/4] items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50">
+      <Link
+        href={`/issue/${issue.comicVineId}`}
+        className="relative flex aspect-[3/4] items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50"
+      >
         {issue.imageUrl ? (
           <img
             src={issue.imageUrl}
@@ -32,10 +39,18 @@ export function IssueCard({ issue }: IssueCardProps) {
             </span>
           </div>
         )}
-      </div>
+        {owned && (
+          <div className="absolute left-2 top-2 rounded bg-green-500 px-1.5 py-0.5">
+            <span className="text-xs font-bold text-white">OWNED</span>
+          </div>
+        )}
+      </Link>
 
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <div className="flex items-baseline gap-1.5">
+        <Link
+          href={`/issue/${issue.comicVineId}`}
+          className="flex items-baseline gap-1.5"
+        >
           <span className="text-sm font-bold text-gray-900">
             #{issue.issueNumber}
           </span>
@@ -44,14 +59,16 @@ export function IssueCard({ issue }: IssueCardProps) {
               {issue.name}
             </span>
           )}
-        </div>
+        </Link>
 
         {issue.description && (
           <p className="line-clamp-2 text-xs text-gray-500">
             {issue.description}
           </p>
         )}
+
+        {actions && <div className="mt-auto pt-1">{actions}</div>}
       </div>
-    </Link>
+    </div>
   );
 }

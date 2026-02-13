@@ -3,6 +3,9 @@
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { IssueCard } from "@/components/comics/issue-card";
+import { CollectButton } from "@/components/comics/collect-button";
+import { WantListButton } from "@/components/comics/want-list-button";
+import { useCollection, useVolumeCollectionStatus } from "@/hooks/use-collection";
 import type { ComicVolume, ComicIssue } from "@/types/comic";
 import type { ApiResponse } from "@/types/api";
 
@@ -14,6 +17,7 @@ export default function VolumeDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const volumeIdNum = parseInt(id, 10);
   const [volume, setVolume] = useState<ComicVolume | null>(null);
   const [issues, setIssues] = useState<ComicIssue[]>([]);
   const [total, setTotal] = useState(0);
@@ -21,6 +25,24 @@ export default function VolumeDetailPage({
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { status: collectionStatus, refresh: refreshCollection } =
+    useVolumeCollectionStatus(volumeIdNum);
+  const { addToCollection, removeFromCollection } = useCollection();
+
+  const ownedSet = new Set(collectionStatus?.ownedIssueIds ?? []);
+
+  async function handleAdd(issue: Parameters<typeof addToCollection>[0]) {
+    const ok = await addToCollection(issue);
+    if (ok) refreshCollection();
+    return ok;
+  }
+
+  async function handleRemove(issueId: number) {
+    const ok = await removeFromCollection(issueId);
+    if (ok) refreshCollection();
+    return ok;
+  }
 
   useEffect(() => {
     fetchVolume(0);
@@ -105,6 +127,8 @@ export default function VolumeDetailPage({
   if (!volume) return null;
 
   const hasMore = offset < total;
+  const ownedCount = collectionStatus?.ownedCount ?? 0;
+  const completionPct = total > 0 ? Math.round((ownedCount / total) * 100) : 0;
 
   return (
     <div className="space-y-6">
@@ -140,7 +164,7 @@ export default function VolumeDetailPage({
             />
           </div>
         )}
-        <div className="space-y-2">
+        <div className="flex-1 space-y-2">
           <h1 className="text-2xl font-bold text-gray-900">{volume.name}</h1>
           <div className="flex flex-wrap gap-2">
             {volume.publisher && (
@@ -162,6 +186,26 @@ export default function VolumeDetailPage({
               {volume.description}
             </p>
           )}
+
+          {/* Collection progress bar */}
+          <div className="max-w-md pt-1">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-medium text-gray-700">
+                Collection: {ownedCount} of {total} ({completionPct}%)
+              </span>
+              {ownedCount > 0 && ownedCount < total && (
+                <span className="text-gray-500">
+                  {total - ownedCount} remaining
+                </span>
+              )}
+            </div>
+            <div className="mt-1 h-2 overflow-hidden rounded-full bg-gray-200">
+              <div
+                className="h-full rounded-full bg-green-500 transition-all duration-500"
+                style={{ width: `${completionPct}%` }}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -177,7 +221,35 @@ export default function VolumeDetailPage({
         </h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {issues.map((issue) => (
-            <IssueCard key={issue.id} issue={issue} />
+            <IssueCard
+              key={issue.id}
+              issue={issue}
+              owned={ownedSet.has(issue.comicVineId)}
+              actions={
+                <div className="flex flex-wrap gap-1">
+                  <CollectButton
+                    issue={{
+                      comicVineIssueId: issue.comicVineId,
+                      comicVineVolumeId: volumeIdNum,
+                      volumeName: issue.volumeName,
+                      issueNumber: issue.issueNumber,
+                      name: issue.name,
+                      imageUrl: issue.imageUrl,
+                      coverDate: issue.coverDate,
+                    }}
+                    isOwned={ownedSet.has(issue.comicVineId)}
+                    onAdd={handleAdd}
+                    onRemove={handleRemove}
+                  />
+                  {!ownedSet.has(issue.comicVineId) && (
+                    <WantListButton
+                      volumeName={issue.volumeName}
+                      issueNumber={issue.issueNumber}
+                    />
+                  )}
+                </div>
+              }
+            />
           ))}
         </div>
       </div>

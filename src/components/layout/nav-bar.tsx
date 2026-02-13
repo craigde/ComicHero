@@ -9,6 +9,7 @@ const navLinks = [
   { href: "/issue", label: "Search by Issue" },
   { href: "/character", label: "Search by Character" },
   { href: "/key-issues", label: "Key Issues" },
+  { href: "/collection", label: "Collection" },
   { href: "/want-list", label: "Want List" },
 ];
 

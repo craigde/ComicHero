@@ -2,6 +2,9 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
+import { CollectButton } from "@/components/comics/collect-button";
+import { WantListButton } from "@/components/comics/want-list-button";
+import { useCollection } from "@/hooks/use-collection";
 import type { ComicIssue } from "@/types/comic";
 import type { ApiResponse } from "@/types/api";
 
@@ -14,15 +17,31 @@ export default function IssueDetailPage({
   const [issue, setIssue] = useState<ComicIssue | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [owned, setOwned] = useState(false);
+
+  const { addToCollection, removeFromCollection } = useCollection();
 
   useEffect(() => {
     async function fetchIssue() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/comicvine/issue/${id}`);
-        const data: ApiResponse<ComicIssue> = await res.json();
+        const [issueRes, collRes] = await Promise.all([
+          fetch(`/api/comicvine/issue/${id}`),
+          fetch(`/api/collection?limit=1&volumeId=0`), // We'll check ownership below
+        ]);
+        const data: ApiResponse<ComicIssue> = await issueRes.json();
         if (data.success && data.data) {
           setIssue(data.data);
+          // Check if this specific issue is in collection
+          const checkRes = await fetch(
+            `/api/collection/volume/${data.data.volumeId}`
+          );
+          const checkData = await checkRes.json();
+          if (checkData.success && checkData.data) {
+            setOwned(
+              checkData.data.ownedIssueIds.includes(data.data.comicVineId)
+            );
+          }
         } else {
           setError(data.error || "Issue not found");
         }
@@ -34,6 +53,18 @@ export default function IssueDetailPage({
     }
     fetchIssue();
   }, [id]);
+
+  async function handleAdd(issueData: Parameters<typeof addToCollection>[0]) {
+    const ok = await addToCollection(issueData);
+    if (ok) setOwned(true);
+    return ok;
+  }
+
+  async function handleRemove(issueId: number) {
+    const ok = await removeFromCollection(issueId);
+    if (ok) setOwned(false);
+    return ok;
+  }
 
   if (loading) {
     return (
@@ -125,6 +156,32 @@ export default function IssueDetailPage({
             >
               {issue.volumeName} (all issues)
             </Link>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex gap-2 pt-1">
+            <CollectButton
+              issue={{
+                comicVineIssueId: issue.comicVineId,
+                comicVineVolumeId: parseInt(issue.volumeId, 10),
+                volumeName: issue.volumeName,
+                issueNumber: issue.issueNumber,
+                name: issue.name,
+                imageUrl: issue.imageUrl,
+                coverDate: issue.coverDate,
+              }}
+              isOwned={owned}
+              onAdd={handleAdd}
+              onRemove={handleRemove}
+              size="md"
+            />
+            {!owned && (
+              <WantListButton
+                volumeName={issue.volumeName}
+                issueNumber={issue.issueNumber}
+                size="md"
+              />
+            )}
           </div>
 
           {issue.description && (

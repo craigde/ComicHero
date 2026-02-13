@@ -53,6 +53,24 @@ model CachedComicVineData {
   @@index([expiresAt])
 }
 
+model CollectionItem {
+  id               String   @id @default(uuid())
+  comicVineIssueId Int
+  comicVineVolumeId Int
+  volumeName       String
+  issueNumber      String
+  name             String?
+  imageUrl         String?
+  coverDate        String?
+  condition        String?
+  notes            String?
+  pricePaid        Float?
+  addedAt          DateTime @default(now())
+
+  @@unique([comicVineIssueId])
+  @@index([comicVineVolumeId])
+}
+
 model PriceSnapshot {
   id           String   @id @default(uuid())
   volumeName   String
