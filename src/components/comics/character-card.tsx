@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Character } from "@/types/comic";
 
 interface CharacterCardProps {
@@ -6,13 +7,16 @@ interface CharacterCardProps {
 
 export function CharacterCard({ character }: CharacterCardProps) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md">
+    <Link
+      href={`/character/${character.comicVineId}`}
+      className="group flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md"
+    >
       <div className="relative flex aspect-[3/4] items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50">
         {character.imageUrl ? (
           <img
             src={character.imageUrl}
             alt={character.name}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-transform group-hover:scale-105"
           />
         ) : (
           <div className="p-4 text-center">
@@ -62,11 +66,15 @@ export function CharacterCard({ character }: CharacterCardProps) {
         </div>
 
         {character.description && (
-          <p className="line-clamp-3 text-xs text-gray-600">
+          <p className="line-clamp-2 text-xs text-gray-600">
             {character.description}
           </p>
         )}
+
+        <span className="mt-auto text-xs font-medium text-indigo-600 group-hover:text-indigo-700">
+          View details &rarr;
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }

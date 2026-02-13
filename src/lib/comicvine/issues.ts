@@ -48,6 +48,49 @@ export async function searchVolumes(query: string): Promise<ComicVolume[]> {
   return volumes;
 }
 
+export async function getVolumeDetail(volumeId: number): Promise<ComicVolume | null> {
+  const cacheKey = `volume:${volumeId}`;
+  const cached = await getFromCache<ComicVolume>(cacheKey);
+  if (cached) return cached;
+
+  const data = await comicVineFetch<CVApiResponse<CVVolume>>(
+    `volume/4050-${volumeId}`,
+    {
+      field_list: "id,name,start_year,publisher,count_of_issues,image,deck",
+    }
+  );
+
+  if (!data.results) return null;
+
+  const volume = mapCVVolume(data.results);
+  await setInCache(cacheKey, "volume", volume, 300, 7 * 24 * 60 * 60);
+  return volume;
+}
+
+export async function getVolumeIssues(
+  volumeId: number,
+  offset = 0,
+  limit = 100
+): Promise<{ issues: ComicIssue[]; total: number }> {
+  const cacheKey = `volume_issues:${volumeId}:${offset}:${limit}`;
+  const cached = await getFromCache<{ issues: ComicIssue[]; total: number }>(cacheKey);
+  if (cached) return cached;
+
+  const data = await comicVineFetch<CVApiResponse<CVIssue[]>>("issues", {
+    filter: `volume:${volumeId}`,
+    field_list: "id,name,issue_number,volume,cover_date,image,deck",
+    sort: "issue_number:asc",
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  const issues = data.results.map(mapCVIssue);
+  const total = data.number_of_total_results;
+  const result = { issues, total };
+  await setInCache(cacheKey, "volume_issues", result, 300, 7 * 24 * 60 * 60);
+  return result;
+}
+
 export async function getIssueDetail(issueId: number): Promise<ComicIssue | null> {
   const cacheKey = `issue:${issueId}`;
   const cached = await getFromCache<ComicIssue>(cacheKey);
